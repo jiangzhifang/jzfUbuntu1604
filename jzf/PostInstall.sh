@@ -11,3 +11,19 @@ sudo wget -O - http://hwraid.le-vert.net/debian/hwraid.le-vert.net.gpg.key | sud
 sudo apt-get update
 sudo apt-get -y install megacli
 
+umount /TMP
+sed -i '\/TMP/d' /etc/fstab
+TMP_PART_NUM=$(df -Th | grep '/TMP' | awk '{print $1}' | awk -F 'sda' '{print $2}')
+parted -s /dev/sda rm ${TMP_PART_NUM}
+
+HD_TYPE=$(megacli -PdList -aAll -NoLog | grep "^Media Type" | head -n 1 | awk -F ': ' '{print $2}')
+
+if [ "$HD_TYPE" == "Hard Disk Device" ]; then
+    sed -i '/exit 0/i\echo "deadline" > /sys/block/sda/queue/scheduler' /etc/rc.local
+elif [ "$HD_TYPE" == "Solid State Device" ]; then
+    sed -i '/exit 0/i\echo "noop" > /sys/block/sda/queue/scheduler' /etc/rc.local
+else
+    echo "set io scheduler ERROR, check /etc/rc.local and /sys/block/sda/queue/scheduler" > /root/jzfUbuntu1604/jzf/set_io_scheduler.log
+fi
+
+sed -i '/exit 0/i\echo "2048" > /sys/block/sda/queue/nr_requests' /etc/rc.local
