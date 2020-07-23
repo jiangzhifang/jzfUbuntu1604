@@ -12,11 +12,12 @@ sudo apt-get update
 sudo apt-get -y install megacli
 
 umount /TMP
-sed -i '\/TMP/d' /etc/fstab
 
 TMP_PART_UUID=$(grep '/TMP' /etc/fstab | grep -v '#' | awk '{print $1}' | awk -F '=' '{print $2}')
 TMP_PART_NUM=$(blkid | grep ${TMP_PART_UUID} | awk -F ':' '{print $1}' | awk -F 'sda' '{print $2}')
 parted -s /dev/sda rm ${TMP_PART_NUM}
+
+sed -i '\/TMP/d' /etc/fstab
 
 HD_TYPE=$(megacli -PdList -aAll -NoLog | grep "^Media Type" | head -n 1 | awk -F ': ' '{print $2}')
 
