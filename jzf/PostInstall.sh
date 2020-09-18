@@ -30,3 +30,4 @@ else
 fi
 
 sed -i '/exit 0/i\echo "2048" > /sys/block/sda/queue/nr_requests' /etc/rc.local
+sed -i 's/TimeoutStartSec=5min/TimeoutStartSec=1sec/' /etc/systemd/system/network-online.target.wants/networking.service
